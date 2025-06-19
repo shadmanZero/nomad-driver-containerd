@@ -81,7 +81,7 @@ var (
 		),
 		"containerd_runtime": hclspec.NewAttr("containerd_runtime", "string", true),
 		"containerd_runtime_options": hclspec.NewBlock("containerd_runtime_options", false, hclspec.NewObject(map[string]*hclspec.Spec{
-			"config_path": hclspec.NewAttr("config_path", "string", false),
+			"ConfigPath": hclspec.NewAttr("ConfigPath", "string", false),
 		})),
 		"stats_interval":     hclspec.NewAttr("stats_interval", "string", false),
 		"allow_privileged": hclspec.NewDefault(
@@ -152,19 +152,19 @@ var (
 	}
 )
 
-// RuntimeOptions to pass to containerd.
-type RuntimeOptions struct {
-	ConfigPath string `codec:"config_path"`
+// Options to pass to containerd.
+type Options struct {
+	ConfigPath string `codec:"ConfigPath"`
 }
 
 // Config contains configuration information for the plugin
 type Config struct {
-	Enabled                  bool            `codec:"enabled"`
-	ContainerdRuntime        string          `codec:"containerd_runtime"`
-	ContainerdRuntimeOptions *RuntimeOptions `codec:"containerd_runtime_options"`
-	StatsInterval            string          `codec:"stats_interval"`
-	AllowPrivileged          bool            `codec:"allow_privileged"`
-	Auth                     RegistryAuth    `codec:"auth"`
+	Enabled                  bool      `codec:"enabled"`
+	ContainerdRuntime        string    `codec:"containerd_runtime"`
+	ContainerdRuntimeOptions Options   `codec:"containerd_runtime_options"`
+	StatsInterval            string    `codec:"stats_interval"`
+	AllowPrivileged          bool      `codec:"allow_privileged"`
+	Auth                     RegistryAuth `codec:"auth"`
 }
 
 // Volume, bind, and tmpfs type mounts are supported.
