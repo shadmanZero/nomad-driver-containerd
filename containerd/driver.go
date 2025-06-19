@@ -80,6 +80,9 @@ var (
 			hclspec.NewLiteral("true"),
 		),
 		"containerd_runtime": hclspec.NewAttr("containerd_runtime", "string", true),
+		"containerd_runtime_options": hclspec.NewBlock("containerd_runtime_options", false, hclspec.NewObject(map[string]*hclspec.Spec{
+			"config_path": hclspec.NewAttr("config_path", "string", false),
+		})),
 		"stats_interval":     hclspec.NewAttr("stats_interval", "string", false),
 		"allow_privileged": hclspec.NewDefault(
 			hclspec.NewAttr("allow_privileged", "bool", false),
@@ -149,13 +152,19 @@ var (
 	}
 )
 
+// RuntimeOptions to pass to containerd.
+type RuntimeOptions struct {
+	ConfigPath string `codec:"config_path"`
+}
+
 // Config contains configuration information for the plugin
 type Config struct {
-	Enabled           bool         `codec:"enabled"`
-	ContainerdRuntime string       `codec:"containerd_runtime"`
-	StatsInterval     string       `codec:"stats_interval"`
-	AllowPrivileged   bool         `codec:"allow_privileged"`
-	Auth              RegistryAuth `codec:"auth"`
+	Enabled                  bool            `codec:"enabled"`
+	ContainerdRuntime        string          `codec:"containerd_runtime"`
+	ContainerdRuntimeOptions *RuntimeOptions `codec:"containerd_runtime_options"`
+	StatsInterval            string          `codec:"stats_interval"`
+	AllowPrivileged          bool            `codec:"allow_privileged"`
+	Auth                     RegistryAuth    `codec:"auth"`
 }
 
 // Volume, bind, and tmpfs type mounts are supported.
@@ -342,6 +351,9 @@ func (d *Driver) SetConfig(cfg *base.Config) error {
 		d.compute = cfg.AgentConfig.Compute()
 	}
 
+	// Create a new context for the driver.
+	// This context will be cancelled when the plugin is shutting down.
+	d.ctx, d.signalShutdown = context.WithCancel(context.Background())
 	return nil
 }
 
